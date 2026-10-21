@@ -9,7 +9,7 @@ NutThickness = 2.5+0.8;
 
 $fn = $preview ? 100 : 200; 
 
-GenerateInOnePiece = true;
+GenerateInOnePiece = false;
 
 lidLength = 166;
 lidWidth = 66;
@@ -140,7 +140,13 @@ translate([0,offsetFromLidToBracelet1,0])
     translate([-width,0,-braceletThickness])
     ingot(width,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2);
 
+    //The width of the cylinder at its apex
     cylinderWidth = 106;
+    //The cylinder part isn't a cylinder cut in too, it's a portion of a circle taken from a certain angle on that circle, what angle is that ?
+    arcAngle = 70;
+
+    //With the width and angle, we can infer the radius of the cylinder
+    radius = (0.5*cylinderWidth)/cos(arcAngle);
 }
 
 //Face 3
@@ -218,6 +224,9 @@ translate([0,offsetFromLidToBracelet1,0])
     // cube([3,4,braceletThickness+5]);
 }
 
+Strap1Width = 50;
+Strap2Width = 20;
+
 //Face 6
 translate( GenerateInOnePiece ? 
     [-cos(angleBetweenBraceletParts)*braceletWidth6+sin(angleBetweenBraceletParts)*braceletThickness,0,
@@ -244,7 +253,24 @@ translate([0,offsetFromLidToBracelet2,0])
             rotate([0,0,-90-angle])
             cube([30,10,braceletThickness+2], [10,100,10]);
         }
-    }
+
+        //Making the grooves for the braces
+        //Leeway between the grooves and the real strap
+        strapWidthLeeway = 1;
+        strapGrooveDepth = 0.5;
+
+        translate([0, braceletLength2-Strap1Width-3+0.5*strapWidthLeeway,-1])
+        cube([width,Strap1Width+strapWidthLeeway,1+strapGrooveDepth]);
+
+        translate([0, 30-0.5*strapWidthLeeway,-1])
+        cube([width,Strap2Width+strapWidthLeeway,1+strapGrooveDepth]);
+    } 
+
+//     strapWidthLeeway = 1;
+//         strapGrooveDepth = 1;
+//  translate([-width,0,-braceletThickness])
+//         translate([width, braceletLength2-Strap1Width-3+0.5*strapWidthLeeway,2*braceletThickness-strapGrooveDepth])
+//         cube([width,Strap1Width+strapWidthLeeway,10]);
 }
 
 module nutSlot(channelBottomOfNutsHeight, channelTopOfNutsHeight )
