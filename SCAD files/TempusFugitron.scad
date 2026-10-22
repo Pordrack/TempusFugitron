@@ -7,16 +7,15 @@ ScrewThreadDiameter = 3+1;
 NutDiameter = 6 + 0.5;
 NutThickness = 2.5+0.8; 
 
-$fn = $preview ? 100 : 200; 
+$fn = $preview ? 100 : 500; 
 
-GenerateInOnePiece = false;
+GenerateInOnePiece = true;
 
 lidLength = 166;
 lidWidth = 66;
 lidSupportThickness = 4.7;
 
 //Top part
-if(false)
 {
     height = 27;
 
@@ -143,10 +142,34 @@ translate([0,offsetFromLidToBracelet1,0])
     //The width of the cylinder at its apex
     cylinderWidth = 106;
     //The cylinder part isn't a cylinder cut in too, it's a portion of a circle taken from a certain angle on that circle, what angle is that ?
-    arcAngle = 70;
+    arcAngle = 60;
 
     //With the width and angle, we can infer the radius of the cylinder
-    radius = (0.5*cylinderWidth)/cos(arcAngle);
+    radius = (0.5*cylinderWidth)/sin(arcAngle);
+    //Perpendicular to the bracelet and width
+    cylinderLength = radius * (1-cos(arcAngle));
+
+    //At which angle is the cylinder protusing from the bracelet
+    protrusionAngle = acos(cylinderLength/width);
+    //The part of the cylinder that's protruding
+    cylinderHeight = sin(protrusionAngle)*width;
+    
+    difference()
+    {
+        cylinderWallThickness = 3;
+        rotate([0,-protrusionAngle,0])
+        translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth,-(cylinderHeight)+0.5*braceletThickness])
+        difference()
+        {
+            cylinder(r=radius, h=cylinderHeight+1);
+            translate([0,0,-cylinderWallThickness-10])
+            cylinder(r=radius-cylinderWallThickness, h=cylinderHeight+10);
+        }
+        
+        rotate([0,180,0])
+        translate([-width-50,-150+braceletLength1-0.5*cylinderWidth,-braceletThickness])
+        cube([width+200, 300, 100]);
+    }
 }
 
 //Face 3
@@ -204,7 +227,7 @@ translate([0,offsetFromLidToBracelet1,0])
             translate([width-10,0,0])
             rotate([0,0,-angle])
             translate([-10,0,0])
-            cube([10,100,braceletThickness+1], [10,100,10]);
+            cube([10,100,braceletThickness+1]);
         }
 
         translate([0,0,-1])
