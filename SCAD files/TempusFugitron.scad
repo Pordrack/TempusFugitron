@@ -1,4 +1,5 @@
 use <SectorArcModule.scad>
+use <BezierModule.scad>
 
 //You should add somme wiggle room to the measurement for the screws. Personally A little over 1mm was necessery
 ScrewHeadDiameter = 5+1;
@@ -7,7 +8,11 @@ ScrewThreadDiameter = 3+1;
 NutDiameter = 6 + 0.5;
 NutThickness = 2.5+0.8; 
 
+BraceletSmoothingAmount = 5; //I advise to not go above 20
+
 $fn = $preview ? 100 : 500; 
+BezierSteps = $preview ? 2 : 100;
+ComputeBeziers = $preview ? true : true;
 
 GenerateInOnePiece = true;
 
@@ -137,7 +142,7 @@ translate([0,offsetFromLidToBracelet1,0])
     width = braceletWidth2;
     rotate([0,180,0])
     translate([-width,0,-braceletThickness])
-    ingot(width,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2);
+    ingot(width,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2, true);
 
     //The width of the cylinder at its apex
     cylinderWidth = 106;
@@ -185,7 +190,7 @@ translate([0,offsetFromLidToBracelet1,0])
     width = braceletWidth3;
     rotate([0,180,0])
     translate([-width,0,-braceletThickness])
-    ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60);
+    ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
 }
 
 //Face 4
@@ -200,7 +205,7 @@ translate([0,offsetFromLidToBracelet1,0])
     width = braceletWidth4;
     rotate([0,180,0])
     translate([-width,0,-braceletThickness])
-    ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60);
+    ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
 }
 
 //Face 5
@@ -217,27 +222,27 @@ translate([0,offsetFromLidToBracelet1,0])
     translate([-width,0,-braceletThickness])
     difference()
     {
-        ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60);
+        ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
         //the two notches
-        translate([0,braceletLength1-10,-1])
+        translate([0,braceletLength1-10,-5])
         {
-            cube([width-10,10,braceletThickness+2]);
+            cube([width-10,10,braceletThickness+10]);
             angle = atan((10-3)/10);
             
             translate([width-10,0,0])
             rotate([0,0,-angle])
             translate([-10,0,0])
-            cube([10,100,braceletThickness+1]);
+            cube([10,100,braceletThickness+10]);
         }
 
-        translate([0,0,-1])
+        translate([0,0,-5])
         {
             angle = atan((20-4)/(20-6));
-            cube([width-20,20,braceletThickness+2]);
+            cube([width-20,20,braceletThickness+10]);
             translate([width-20,20-4,0])
             rotate([0,0,-angle])
             translate([0,-20,0])
-            cube([width-20,20,braceletThickness+3]);
+            cube([width-20,20,braceletThickness+10]);
         }
     }
 
@@ -265,14 +270,14 @@ translate([0,offsetFromLidToBracelet2,0])
     translate([-width,0,-braceletThickness])
     difference()
     {
-        ingot(width,braceletLength2,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2);
+        ingot(width,braceletLength2,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2, false, true);
 
-        translate([width-15,0,-1])
+        translate([width-15,0,-5])
         {
-            cube([15,20,braceletThickness+2]);
+            cube([15,20,braceletThickness+10]);
             angle = atan(10/16);
             
-            translate([0,16,-1])
+            translate([0,16,5])
             rotate([0,0,-90-angle])
             cube([30,10,braceletThickness+2], [10,100,10]);
         }
@@ -312,18 +317,57 @@ module screwSlot(height)
     cylinder(h=200, d=ScrewHeadDiameter);
 }
 
-module ingot(lidWidth, lidLength, height, frontAngle, backAngle, leftAngle, rightAngle)
+module ingot(width, length, height, frontAngle, backAngle, leftAngle, rightAngle, smoothLeft = false, smoothRight = false)
 {
+    //Rotate x and y around 0,0
+    function rotate(point,angle) =
+        let (x1 = point[0] )
+        let (y1 = point[1] )
+        let (x2 = cos(angle) * x1 - sin(angle) * y1 )
+        let (y2 = sin(angle) * x1 + cos(angle) * y1 )
+            [x2, y2];
+
+    //Smooth side only makes sense for ingots with the same left and right angle, since it's there to smooth a potential link to another ingots with the attributs
+    focalPoint = [0,0];
+    pointOnThisIngot = [0, 5];
+    pointOnNextIngot = rotate(pointOnThisIngot, 2*leftAngle);
+
     difference()
         {
-            cube([lidWidth, lidLength, height]);
+            union()
+            {
+                cube([width, length, height]);
+
+                if(ComputeBeziers && smoothLeft)
+                    rotate([90,90,0])
+                    translate([-height,tan(90-leftAngle)*height,-length-1]) 
+                    BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+
+                if(ComputeBeziers && smoothRight)
+                    rotate([-90,90,0])
+                    translate([-height,-width+tan(90-leftAngle)*height,0])
+                    BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+            }
+            
             //color("red")
-            rotate([frontAngle,0,0])translate([-10,0,0])cube([lidWidth+20,100,100]);
+            rotate([frontAngle,0,0])translate([-10,0,0])cube([width+20,100,100]);
             //color("blue")
-            translate([0, lidLength,0])rotate([90-backAngle,0,0])translate([-10,0,0])cube([lidWidth+20,100,100]);
+            translate([0, length,0])rotate([90-backAngle,0,0])translate([-10,0,0])cube([width+20,100,100]);
             //color("blue")
-            translate([0, 0,0])rotate([0,-leftAngle,0])translate([0, -10,0])cube([70,lidLength+20,100]);
+            translate([0, 0,0])rotate([0,-leftAngle,0])translate([0, -10,0])cube([70,length+20,100]);
             //color("red")
-            translate([lidWidth, 0,0])rotate([0,-(90-rightAngle),0])translate([0, -10,0])cube([70,lidLength+20,100]);
-        } 
+            translate([width, 0,0])rotate([0,-(90-rightAngle),0])translate([0, -10,0])cube([70,length+20,100]);
+
+            
+    
+            if(ComputeBeziers && smoothLeft)
+                rotate([90,90,0])
+                translate([0,0,-length-1]) 
+                BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+
+            if(ComputeBeziers && smoothRight)
+                rotate([-90,90,0])
+                translate([0,-width,0]) 
+                BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+        }  
 }
