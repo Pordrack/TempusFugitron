@@ -8,13 +8,16 @@ ScrewThreadDiameter = 3+1;
 NutDiameter = 6 + 0.5;
 NutThickness = 2.5+0.8; 
 
+CableHoleDiameter = 4;
+WiresHoleDiameter = 4;
+
 BraceletSmoothingAmount = 5; //I advise to not go above 20
 
 $fn = $preview ? 100 : 500; 
 BezierSteps = $preview ? 2 : 500;
 ComputeBeziers = $preview ? false : true;
 
-GenerateInOnePiece = false;
+GenerateInOnePiece = true;
 GenerateBraceletInOnePiece = true;
 
 lidLength = 166;
@@ -73,9 +76,9 @@ lidSupportThickness = 4.7;
                 nutSlot(1,0);
 
                translate([8, lidLength,8])
-                //And the hole for the cables
+                //And the hole for the wires
                 rotate([90,0,0])
-                cylinder(d=3, h=frontBackThickness+20);
+                cylinder(d=WiresHoleDiameter, h=frontBackThickness+20);
             }
         }
     }
@@ -217,6 +220,13 @@ translate([0,offsetFromLidToBracelet1,0])
     firstScrewTranslate = [(width-widthLeeway)-NutDiameter-archaicValueForTheFirstScrew+0.5*NutDiameter,braceletLength1-0.5*cylinderWidth,braceletThickness];
     secondScrewTranslate = [archaicValueForTheSecondScrew+0.5*NutDiameter,braceletLength1-0.5*cylinderWidth,braceletThickness];
 
+    //The value for the notches
+    notchAngle = 25;
+    notchAngleSpan = 15;
+    notchRadius = 47;
+    notchRadiusSpan = 15;
+    notchWallsThickness = 2;
+
     translate(GenerateInOnePiece ? [0,0,0] : [0,0,100])
     difference()
     {
@@ -225,8 +235,47 @@ translate([0,offsetFromLidToBracelet1,0])
         difference()
         {
             rotate([0,-protrusionAngle,0])
-            translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth,-(cylinderHeight)+0.5*braceletThickness])
-            cylinder(r=radius, h=cylinderHeight+1);
+            translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth,-(cylinderHeight)+0.5*braceletThickness])  
+            {
+                cylinder(r=radius, h=cylinderHeight+1);
+                color("red")
+                linear_extrude(cylinderHeight+2) arc(notchRadius-0.5*notchRadiusSpan, 
+                    [notchAngle-0.5*notchAngleSpan, notchAngle+0.5*notchAngleSpan], width = notchRadiusSpan);
+
+                color("red")
+                linear_extrude(cylinderHeight+2) arc(notchRadius-0.5*notchRadiusSpan, 
+                    [-notchAngle-0.5*notchAngleSpan, -notchAngle+0.5*notchAngleSpan], width = notchRadiusSpan);
+            }
+
+            rotate([0,-protrusionAngle,0])
+            translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth
+                ,-(cylinderHeight)+0.5*braceletThickness+cylinderHeight+2-2])  
+            {
+                color("yellow")
+                linear_extrude(3) arc(notchRadius-0.5*notchRadiusSpan+notchWallsThickness, 
+                    [notchAngle-0.5*notchAngleSpan+notchWallsThickness, notchAngle+0.5*notchAngleSpan-notchWallsThickness], width = notchRadiusSpan-2*notchWallsThickness);
+
+                color("yellow")
+                linear_extrude(3) arc(notchRadius-0.5*notchRadiusSpan+notchWallsThickness, 
+                    [-notchAngle-0.5*notchAngleSpan+notchWallsThickness, -notchAngle+0.5*notchAngleSpan-notchWallsThickness], width = notchRadiusSpan-2*notchWallsThickness);
+            }
+            
+   
+            rotate([0,-protrusionAngle,0])
+            translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth,-(cylinderHeight)+0.5*braceletThickness])  
+            translate([0,0,0.5*cylinderHeight+4])
+            {
+                rotate([40,90,0])
+                color("red")
+                cylinder(h=radius+1,d=CableHoleDiameter);
+
+                translate([0,0,-2])
+                rotate([30,90,0])
+                color("cyan")
+                cylinder(h=radius+1,d=WiresHoleDiameter);
+            }
+           
+            
 
             difference()
             {
@@ -250,6 +299,8 @@ translate([0,offsetFromLidToBracelet1,0])
 
             translate(secondScrewTranslate)
             nutSlot(1,1);
+
+            //Holes for the cables
         }
 
         //We remove all the unwanted part of the cylinder
@@ -374,9 +425,15 @@ translate([0,offsetFromLidToBracelet1,0])
         ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
 
         //Serflex hole
-        pifometricOffset = 0;
+        pifometricOffset = 20;
         translate([0.5*width-0.5*serflexHoleWidth+pifometricOffset,braceletLength1-serflexHoleThickness-serflexHoleOffset,-1])
         cube([serflexHoleWidth, serflexHoleThickness, braceletThickness+2]);
+
+        //Cable hole
+        pifometricOffset2 = 0;
+        pifometricOffset3 = 14;
+        translate([0.5*width+pifometricOffset2,braceletLength1-pifometricOffset3,-1])
+        cylinder(d=CableHoleDiameter, h=braceletThickness+2);
     }
 }
 
@@ -467,19 +524,18 @@ translate([0,offsetFromLidToBracelet2,0])
 
         //Making the holes to pass cables
         spaceBetweenStraps = braceletLength2 - Strap1Width - 3 - Strap2Width - 30;
-        cableHoleDiameter = 4;
         spaceBetweenRows = 20;
         spaceBetweenLines = 8;
 
-        totalWidth =  2.5*spaceBetweenLines + cableHoleDiameter;
+        totalWidth =  2.5*spaceBetweenLines + CableHoleDiameter;
         
         pifometricOffset = -1;
-        translate([0.5*(width-totalWidth)+0.5*cableHoleDiameter+pifometricOffset,30+Strap2Width+0.5*strapWidthLeeway+0.5*(spaceBetweenStraps-spaceBetweenRows),-1])
+        translate([0.5*(width-totalWidth)+0.5*CableHoleDiameter+pifometricOffset,30+Strap2Width+0.5*strapWidthLeeway+0.5*(spaceBetweenStraps-spaceBetweenRows),-1])
         {
             for(x=[0:1])
                 for(y=[0:2])
                     translate([x*0.5*spaceBetweenLines+y*spaceBetweenLines,x*spaceBetweenRows,0])
-                    cylinder(d=cableHoleDiameter, h=10);
+                    cylinder(d=CableHoleDiameter, h=10);
         }
     } 
 
