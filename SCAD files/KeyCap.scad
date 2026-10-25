@@ -1,12 +1,16 @@
 //Taken from https://www.thingiverse.com/thing:2783650/files
 
+ScrewThreadDiameter = 3+1;
+NutDiameter = 6 + 0.5;
+NutThickness = 2.5+0.8; 
+
 // entry point for customizer script. This probably isn't useful to most people,
 // as it's just a wrapper that helps generate customizer.scad for thingiverse.
 
 /* [Basic-Settings] */
 
 // what preset profile do you wish to use? disable if you are going to set paramters below
-key_profile = "dcs"; // [dcs, oem, dsa, sa, g20, disable]
+key_profile = "disable"; // [dcs, oem, dsa, sa, g20, disable]
 // what key profile row is this keycap on? 0 for disable
 row = 1; // [5,1,2,3,4,0]
 
@@ -19,7 +23,7 @@ legend = "";
 $key_length = 1.0; // Range not working in thingiverse customizer atm [1:0.25:16]
 
 // What type of stem you want. Most people want Cherry.
-$stem_type = "cherry";  // [cherry, alps, rounded_cherry, box_cherry, filled, disable]
+$stem_type = "nut";  // [cherry, alps, rounded_cherry, box_cherry, filled, nut, disable]
 
 // The stem is the hardest part to print, so this variable controls how much 'slop' there is in the stem
 $stem_slop = 0.3; // Not working in thingiverse customizer atm [0:0.01:1]
@@ -57,11 +61,11 @@ $width_difference = 6;
 // How much less height there is on the top
 $height_difference = 4;
 // How deep the key is, before adding a dish
-$total_depth = 11.5;
+$total_depth = 5;
 // The tilt of the dish in degrees. divided by key height
-$top_tilt = -6;
+$top_tilt = 1;
 // How skewed towards the back the top is (0 for center)
-$top_skew = 1.7;
+$top_skew = 1.75;
 
 /* Stem */
 
@@ -92,7 +96,7 @@ $height_slices = 1;
 // What type of dish the key has. note that unlike stems and supports a dish ALWAYS gets rendered.
 $dish_type = "cylindrical"; // [cylindrical, spherical, sideways cylindrical, old spherical, disable]
 // How deep the dish 'digs' into the top of the keycap. this is max depth, so you can't find the height from total_depth - dish_depth. besides the top is skewed anyways
-$dish_depth = 1;
+$dish_depth = 0.5;
 // How skewed in the x direction the dish is
 $dish_skew_x = 0;
 // How skewed in the y direction (height) the dish is
@@ -1100,6 +1104,17 @@ module filled_stem() {
   shape($wall_thickness);
 }
 
+module nut_stem()
+{
+  color("red")
+  difference()
+  {
+    cylinder(d=NutDiameter+2,h=$total_depth);
+    nutSlot(1,1);
+  }
+  
+}
+
 
 //whole stem, alps or cherry, trimmed to fit
 module stem(stem_type, depth, slop){
@@ -1113,6 +1128,8 @@ module stem(stem_type, depth, slop){
       box_cherry_stem(depth, slop);
     } else if (stem_type == "filled") {
       filled_stem();
+    } else if (stem_type == "nut") {
+      nut_stem();
     } else if (stem_type == "disable") {
       children();
     } else {
@@ -2244,4 +2261,11 @@ $stem_positions = [[0,0]];
 
 key_profile(key_profile, row) legend(legend) {
   key();
+}
+
+module nutSlot(channelBottomOfNutsHeight, channelTopOfNutsHeight, openTop=false)
+{
+    translate([0,0,-1]) cylinder(h=1 + channelBottomOfNutsHeight + NutThickness + channelTopOfNutsHeight, d=ScrewThreadDiameter); 
+    translate([0,0,channelBottomOfNutsHeight]) 
+    cylinder(h=openTop ? (NutThickness+1+channelTopOfNutsHeight+channelBottomOfNutsHeight) : NutThickness , d=NutDiameter, $fn=6);
 }
