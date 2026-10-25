@@ -11,10 +11,11 @@ NutThickness = 2.5+0.8;
 BraceletSmoothingAmount = 5; //I advise to not go above 20
 
 $fn = $preview ? 100 : 500; 
-BezierSteps = $preview ? 2 : 100;
-ComputeBeziers = $preview ? true : true;
+BezierSteps = $preview ? 2 : 500;
+ComputeBeziers = $preview ? false : true;
 
-GenerateInOnePiece = true;
+GenerateInOnePiece = false;
+GenerateBraceletInOnePiece = true;
 
 lidLength = 166;
 lidWidth = 66;
@@ -33,7 +34,7 @@ lidSupportThickness = 4.7;
     sideThickness = 3;
 
     //Lid
-    translate([0,0,0])
+    translate((GenerateInOnePiece) ? [0,0,0] : [-2*lidWidth,0,0])
     translate([0.5*lidWidth, 0.5*lidLength, 0])
     {
         difference()
@@ -70,6 +71,11 @@ lidSupportThickness = 4.7;
 
                 translate([lidWidth - 0.5*NutDiameter - 1, lidLength - 0.5*frontBackThickness, 0])
                 nutSlot(1,0);
+
+               translate([8, lidLength,8])
+                //And the hole for the cables
+                rotate([90,0,0])
+                cylinder(d=3, h=frontBackThickness+20);
             }
         }
     }
@@ -92,7 +98,27 @@ lidSupportThickness = 4.7;
 
         translate([lidWidth - 0.5*NutDiameter - 1, lidLength - 0.5*frontBackThickness, 0])
         screwSlot(1);
+
+        translate([0.5*NutDiameter+1+sideThickness, 0.5*NutDiameter+1+frontBackThickness,lidSupportThickness])
+        rotate([0,180,0])
+        nutSlot(1,10,true);
+
+        translate([lidWidth-(0.5*NutDiameter+1+sideThickness), 0.5*NutDiameter+1+frontBackThickness,lidSupportThickness])
+        rotate([0,180,0])
+        nutSlot(1,10,true);
+
+        translate([0.5*NutDiameter+1+sideThickness, lidLength-(0.5*NutDiameter+1+frontBackThickness),lidSupportThickness])
+        rotate([0,180,0])
+        nutSlot(1,10,true);
+
+        translate([lidWidth-(0.5*NutDiameter+1+sideThickness), lidLength-(0.5*NutDiameter+1+frontBackThickness),lidSupportThickness])
+        rotate([0,180,0])
+        nutSlot(1,10,true);
     }
+
+    // translate( GenerateInOnePiece ? [lidWidth,0,0] : [lidWidth+20,0,0])
+    // rotate(GenerateInOnePiece ? [0,180,0] : [0,0,0])
+    
 }
 
 //Starting the bracelet
@@ -121,28 +147,49 @@ offsetFromLidToBracelet2 = 8;//lidLength-braceletLength2 -14;
 braceletThickness = 4;// NutThickness + 2;
 angleBetweenBraceletParts = 60;
 
+serflexHoleWidth = 3;
+serflexHoleThickness = 1;
+
+serflexHoleOffset = 3;
+
 //Face 1
 //Under the lid
-translate( GenerateInOnePiece ? [lidWidth,0,-lidSupportThickness] : [2*(lidWidth+20),0,0])
-rotate(GenerateInOnePiece ? [0,180,0] : [0,0,0])
+translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? [lidWidth,0,-lidSupportThickness] : [2*(lidWidth+20),0,0])
+rotate(GenerateInOnePiece || GenerateBraceletInOnePiece ? [0,180,0] : [0,0,0])
 translate([0,offsetFromLidToBracelet1,0])
 {
-    ingot(braceletWidth1,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2);
+    difference()
+    {
+        ingot(braceletWidth1,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2);
+
+        translate([0,-offsetFromLidToBracelet1,0])
+        {
+            translate([0.5*NutDiameter+1+sideThickness, 0.5*NutDiameter+1+frontBackThickness,0])
+            screwSlot(1);
+
+            translate([lidWidth-(0.5*NutDiameter+1+sideThickness), 0.5*NutDiameter+1+frontBackThickness,0])
+            screwSlot(1);
+
+            translate([0.5*NutDiameter+1+sideThickness, lidLength-(0.5*NutDiameter+1+frontBackThickness),0])
+            screwSlot(1);
+
+            translate([lidWidth-(0.5*NutDiameter+1+sideThickness), lidLength-(0.5*NutDiameter+1+frontBackThickness),0])
+            screwSlot(1);
+        }
+    }
+    
 }
 
 //Face 2
 //With the cylinder
-translate( GenerateInOnePiece ? 
+translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [lidWidth-sin(angleBetweenBraceletParts)*braceletThickness,0,-lidSupportThickness-cos(angleBetweenBraceletParts)*braceletThickness] : 
     [3*(lidWidth+20),0,0]
 )
-rotate(GenerateInOnePiece ? [0,angleBetweenBraceletParts,0] : [0,0,0])
+rotate(GenerateInOnePiece || GenerateBraceletInOnePiece ? [0,angleBetweenBraceletParts,0] : [0,0,0])
 translate([0,offsetFromLidToBracelet1,0])
 {
     width = braceletWidth2;
-    rotate([0,180,0])
-    translate([-width,0,-braceletThickness])
-    ingot(width,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2, true);
 
     //The width of the cylinder at its apex
     cylinderWidth = 106;
@@ -153,68 +200,193 @@ translate([0,offsetFromLidToBracelet1,0])
     radius = (0.5*cylinderWidth)/sin(arcAngle);
     //Perpendicular to the bracelet and width
     cylinderLength = radius * (1-cos(arcAngle));
-
+    
+    //Normally, the cylinder should take all width, but because the bracelet is rounded, we give it a bit of leeway
+    widthLeeway =0.8;
     //At which angle is the cylinder protusing from the bracelet
-    protrusionAngle = acos(cylinderLength/width);
+    //Since we smooth the pieces, we need to change a little the width (to avoid clipping because of the curvature)
+    protrusionAngle = acos(cylinderLength/(width-widthLeeway));//acos(cylinderLength/width);
     //The part of the cylinder that's protruding
     cylinderHeight = sin(protrusionAngle)*width;
-    
+
+    //We also prepare the translate for the screws since they'll be used at other places
+    //I wanted both screw to be perfecly at the top and bottom, but since the cylinder is at an angle etc. It's very hard to find the right calculation
+    //So i added these pifometric values by trial and error
+    archaicValueForTheSecondScrew = 6;
+    archaicValueForTheFirstScrew = 5;
+    firstScrewTranslate = [(width-widthLeeway)-NutDiameter-archaicValueForTheFirstScrew+0.5*NutDiameter,braceletLength1-0.5*cylinderWidth,braceletThickness];
+    secondScrewTranslate = [archaicValueForTheSecondScrew+0.5*NutDiameter,braceletLength1-0.5*cylinderWidth,braceletThickness];
+
+    translate(GenerateInOnePiece ? [0,0,0] : [0,0,100])
     difference()
     {
         cylinderWallThickness = 3;
-        rotate([0,-protrusionAngle,0])
-        translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth,-(cylinderHeight)+0.5*braceletThickness])
+
         difference()
         {
+            rotate([0,-protrusionAngle,0])
+            translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth,-(cylinderHeight)+0.5*braceletThickness])
             cylinder(r=radius, h=cylinderHeight+1);
-            translate([0,0,-cylinderWallThickness-10])
-            cylinder(r=radius-cylinderWallThickness, h=cylinderHeight+10);
+
+            difference()
+            {
+                rotate([0,-protrusionAngle,0])
+                translate([-(radius-cylinderLength)+sin(protrusionAngle)*braceletThickness,braceletLength1-0.5*cylinderWidth,-(cylinderHeight)+0.5*braceletThickness])
+                translate([0,0,-cylinderWallThickness-10])
+                cylinder(r=radius-cylinderWallThickness, h=cylinderHeight+10);
+
+                //These two walls will ensure that we have enough space for the nut slots we're going to add
+                translate(firstScrewTranslate)
+                translate([-0.5*NutDiameter,-0.5*cylinderWidth,0])
+                cube([NutDiameter+2,cylinderWidth,NutThickness]);
+
+                translate(secondScrewTranslate)
+                translate([-archaicValueForTheSecondScrew-0.5*NutDiameter,-0.5*cylinderWidth,0])
+                cube([NutDiameter+archaicValueForTheSecondScrew,cylinderWidth,NutThickness]);
+            }
+
+            translate(firstScrewTranslate)
+            nutSlot(1,1);
+
+            translate(secondScrewTranslate)
+            nutSlot(1,1);
         }
-        
+
+        //We remove all the unwanted part of the cylinder
+
         rotate([0,180,0])
         translate([-width-50,-150+braceletLength1-0.5*cylinderWidth,-braceletThickness])
         cube([width+200, 300, 100]);
+
+        //Subtil mode, to embrase the roundness of the bracelet part etc.
+        // rotate([0,180,0])
+        // translate([-width,0,-braceletThickness])
+        // ingot(width,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2, true);
+        
+        // rotate([0,180,0])
+        // translate([-width-50,-150+braceletLength1-0.5*cylinderWidth,])
+        // cube([width+200, 300, 100]);
+
+        // rotate([0,180,0])
+        // translate([-width,0,-braceletThickness])
+        // {
+        //     leftAngle = 90-angleBetweenBraceletParts/2;
+        //     rightAngle = 90-angleBetweenBraceletParts/2;
+        //     //translate([0, 0,0])rotate([0,-leftAngle,0])translate([0, -10,0])cube([70,braceletLength1+20,100]);
+        //     //color("red")
+        //     translate([width, 0,0])rotate([0,-(90-rightAngle),0])translate([0, -10,0])cube([70,braceletLength1+20,100]);
+        // }
+
+        // translate([0,braceletLength1,0])
+        // cube([10,10,20]);
+    }
+
+    difference()
+    {
+        rotate([0,180,0])
+        translate([-width,0,-braceletThickness])
+        ingot(width,braceletLength1,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2, true);
+
+        translate(firstScrewTranslate)
+        rotate([0,180,0])
+        screwSlot(1);
+
+        translate(secondScrewTranslate)
+        rotate([0,180,0])
+        screwSlot(1);
+
+        //Serflex hole
+        pifometricOffset = 7;
+        translate([0.5*width-0.5*serflexHoleWidth+pifometricOffset,braceletLength1-serflexHoleThickness-serflexHoleOffset,-1])
+        cube([serflexHoleWidth, serflexHoleThickness, braceletThickness+2]);
     }
 }
 
 //Face 3
 //With the keyboard
-translate( GenerateInOnePiece ? 
+translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [lidWidth+cos(angleBetweenBraceletParts)*(braceletWidth2)-sin(angleBetweenBraceletParts)*braceletThickness
     ,0,-lidSupportThickness-sin(angleBetweenBraceletParts)*(braceletWidth2)+cos(angleBetweenBraceletParts)*braceletThickness] : 
     [4*(lidWidth+20),0,0]
 )
-rotate(GenerateInOnePiece ? [0,2*angleBetweenBraceletParts,0] : [0,0,0])
+rotate(GenerateInOnePiece || GenerateBraceletInOnePiece ? [0,2*angleBetweenBraceletParts,0] : [0,0,0])
 translate([0,offsetFromLidToBracelet1,0])
 {
     width = braceletWidth3;
     rotate([0,180,0])
     translate([-width,0,-braceletThickness])
-    ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
+    difference()
+    {
+        ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
+
+        u = 19.05; //U is the standard unit for keyboard, it's the width and height of a standard key (but in actuality they're a bit smaller to avoid rubbing)
+        nbrOfKeyRows = 7;
+        nbrOfKeyLines = 2;
+        totalKeyboardLength = 7 * u;
+        totalKeyboardWidth = 2 * u;
+
+        //We center the keyboard
+        offsetX = 0.5 * (braceletLength1 - totalKeyboardLength);
+        offsetY = 0.5 * (width - totalKeyboardWidth);
+
+        translate([offsetY, offsetX, 0])
+        {
+            for(y = [0:nbrOfKeyLines-1])
+                for(x = [0:nbrOfKeyRows-1])
+                {
+                    //For the two last slot of first line it's a special case
+                    if(y != 1 || (x != 5 && x != 6))
+                    {
+                        translate([0.5*u+y*u, 0.5*u+x*u, 0])
+                        screwSlot(1); 
+                    }
+                }
+
+            translate([0.5*u+1*u, 0.5*u+5.5*u, 0])
+            screwSlot(1); 
+        }
+
+        //Serflex hole
+        pifometricOffset = 0;
+        translate([0.5*width-0.5*serflexHoleWidth+pifometricOffset,braceletLength1-serflexHoleThickness-serflexHoleOffset,-1])
+        cube([serflexHoleWidth, serflexHoleThickness, braceletThickness+2]);
+    } 
+
+    // color("red")
+    // translate([width-20,braceletLength1-15.5,0])
+    // cube([20,15.5,20]);
 }
 
 //Face 4
 //Bottom, with the warning bit
-translate( GenerateInOnePiece ? 
+translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [lidWidth-cos(angleBetweenBraceletParts)*(braceletWidth3-braceletWidth2),0,
     -lidSupportThickness-sin(angleBetweenBraceletParts)*(braceletWidth2+braceletWidth3)+2*cos(angleBetweenBraceletParts)*braceletThickness] : 
     [5*(lidWidth+20),0,0])
-rotate(GenerateInOnePiece ? [0,180,0] : [0,0,0])
+rotate(GenerateInOnePiece || GenerateBraceletInOnePiece ? [0,180,0] : [0,0,0])
 translate([0,offsetFromLidToBracelet1,0])
 {
     width = braceletWidth4;
     rotate([0,180,0])
     translate([-width,0,-braceletThickness])
-    ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
+    difference()
+    {
+        ingot(width,braceletLength1,braceletThickness, 90, 90, 60, 60, true, true);
+
+        //Serflex hole
+        pifometricOffset = 0;
+        translate([0.5*width-0.5*serflexHoleWidth+pifometricOffset,braceletLength1-serflexHoleThickness-serflexHoleOffset,-1])
+        cube([serflexHoleWidth, serflexHoleThickness, braceletThickness+2]);
+    }
 }
 
 //Face 5
-translate( GenerateInOnePiece ? 
+translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [-cos(angleBetweenBraceletParts)*(braceletWidth3-braceletWidth2)+sin(angleBetweenBraceletParts)*braceletThickness+(braceletWidth1-braceletWidth4)
     ,0,
     -lidSupportThickness-sin(angleBetweenBraceletParts)*(braceletWidth2+braceletWidth3)+cos(angleBetweenBraceletParts)*braceletThickness] : 
     [6*(lidWidth+20),0,0])
-rotate(GenerateInOnePiece ? [0,4*angleBetweenBraceletParts,0] : [0,0,0])
+rotate(GenerateInOnePiece || GenerateBraceletInOnePiece ? [0,4*angleBetweenBraceletParts,0] : [0,0,0])
 translate([0,offsetFromLidToBracelet1,0])
 {
     width = braceletWidth5;
@@ -256,13 +428,13 @@ Strap1Width = 50;
 Strap2Width = 20;
 
 //Face 6
-translate( GenerateInOnePiece ? 
+translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [-cos(angleBetweenBraceletParts)*braceletWidth6+sin(angleBetweenBraceletParts)*braceletThickness,0,
     -lidSupportThickness-cos(angleBetweenBraceletParts)*braceletThickness
     -sin(angleBetweenBraceletParts)*braceletWidth6] : 
     [7*(lidWidth+20),0,0]
 )
-rotate(GenerateInOnePiece ? [0,-angleBetweenBraceletParts,0] : [0,0,0])
+rotate(GenerateInOnePiece || GenerateBraceletInOnePiece ? [0,-angleBetweenBraceletParts,0] : [0,0,0])
 translate([0,offsetFromLidToBracelet2,0])
 {
     width = braceletWidth6;
@@ -292,6 +464,23 @@ translate([0,offsetFromLidToBracelet2,0])
 
         translate([0, 30-0.5*strapWidthLeeway,-1])
         cube([width,Strap2Width+strapWidthLeeway,1+strapGrooveDepth]);
+
+        //Making the holes to pass cables
+        spaceBetweenStraps = braceletLength2 - Strap1Width - 3 - Strap2Width - 30;
+        cableHoleDiameter = 4;
+        spaceBetweenRows = 20;
+        spaceBetweenLines = 8;
+
+        totalWidth =  2.5*spaceBetweenLines + cableHoleDiameter;
+        
+        pifometricOffset = -1;
+        translate([0.5*(width-totalWidth)+0.5*cableHoleDiameter+pifometricOffset,30+Strap2Width+0.5*strapWidthLeeway+0.5*(spaceBetweenStraps-spaceBetweenRows),-1])
+        {
+            for(x=[0:1])
+                for(y=[0:2])
+                    translate([x*0.5*spaceBetweenLines+y*spaceBetweenLines,x*spaceBetweenRows,0])
+                    cylinder(d=cableHoleDiameter, h=10);
+        }
     } 
 
 //     strapWidthLeeway = 1;
@@ -301,11 +490,11 @@ translate([0,offsetFromLidToBracelet2,0])
 //         cube([width,Strap1Width+strapWidthLeeway,10]);
 }
 
-module nutSlot(channelBottomOfNutsHeight, channelTopOfNutsHeight )
+module nutSlot(channelBottomOfNutsHeight, channelTopOfNutsHeight, openTop=false)
 {
     translate([0,0,-1]) cylinder(h=1 + channelBottomOfNutsHeight + NutThickness + channelTopOfNutsHeight, d=ScrewThreadDiameter); 
     translate([0,0,channelBottomOfNutsHeight]) 
-    cylinder(h=NutThickness, d=NutDiameter, $fn=6);
+    cylinder(h=openTop ? (NutThickness+1+channelTopOfNutsHeight+channelBottomOfNutsHeight) : NutThickness , d=NutDiameter, $fn=6);
 }
 
 module screwSlot(height)
