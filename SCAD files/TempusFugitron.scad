@@ -5,7 +5,7 @@ use <BezierModule.scad>
 ScrewHeadDiameter = 5+1;
 ScrewHeadThickness = 3; 
 ScrewThreadDiameter = 3+1;
-NutDiameter = 6 + 0.8;
+NutDiameter = 6 + 0.5;
 NutThickness = 2.5+0.8; 
 
 CableHoleDiameter = 4;
