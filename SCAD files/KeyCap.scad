@@ -20,7 +20,7 @@ legend = "";
 /* [Basic-Settings] */
 
 // Length in units of key. A regular key is 1 unit; spacebar is usually 6.25
-$key_length = 1.0; // Range not working in thingiverse customizer atm [1:0.25:16]
+$key_length = 1; // Jeremy: 0.6, 1 and 2
 
 // What type of stem you want. Most people want Cherry.
 $stem_type = "nut";  // [cherry, alps, rounded_cherry, box_cherry, filled, nut, disable]
@@ -57,15 +57,15 @@ $bottom_key_width = 18.16;
 // Height (from the front) of the very bottom of the key
 $bottom_key_height = 18.16;
 // How much less width there is on the top. eg top_key_width = bottom_key_width - width_difference
-$width_difference = 6;
+$width_difference = 6; //Jérémy: Use 6 for 1 and 1 for 0.6
 // How much less height there is on the top
-$height_difference = 4;
+$height_difference = 5; //Jérémy: Use 5 for 1 and 1 for 0.6
 // How deep the key is, before adding a dish
-$total_depth = 5;
+$total_depth = 8;
 // The tilt of the dish in degrees. divided by key height
 $top_tilt = 1;
 // How skewed towards the back the top is (0 for center)
-$top_skew = 1.75;
+$top_skew = 0.9; //Jérémy: 1 for 1 and 0.5 for 0.6
 
 /* Stem */
 
@@ -1109,7 +1109,11 @@ module nut_stem()
   color("red")
   difference()
   {
-    cylinder(d=NutDiameter+2,h=$total_depth);
+    supportWidth = top_total_key_width();//total_key_width($wall_thickness) - width_difference;
+    supportHeight = top_total_key_height();//total_key_height($wall_thickness) - height_difference;
+    //translate([-0.5*supportWidth, -0.5*supportHeight+$top_skew, 0])
+    translate([0,$top_skew,0])
+    linear_extrude($total_depth+10) rounded_square_shape([supportWidth, supportHeight-$top_skew], [0,0], 0);//cube([supportWidth, supportHeight-$top_skew, $total_depth+10]);
     nutSlot(1,1);
   }
   

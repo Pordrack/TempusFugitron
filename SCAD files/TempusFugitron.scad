@@ -5,7 +5,7 @@ use <BezierModule.scad>
 ScrewHeadDiameter = 5+1;
 ScrewHeadThickness = 3; 
 ScrewThreadDiameter = 3+1;
-NutDiameter = 6 + 0.5;
+NutDiameter = 6 + 0.8;
 NutThickness = 2.5+0.8; 
 
 CableHoleDiameter = 4;
@@ -483,6 +483,11 @@ translate([0,offsetFromLidToBracelet1,0])
 
 Strap1Width = 50;
 Strap2Width = 20;
+StrapsAngles = 50;
+StrapsLength1 = 40;
+StrapsLength2 = 30;
+StrapsThickness = 5;
+StrapGrooveDepth = 0.5;
 
 //Face 6
 translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
@@ -513,14 +518,13 @@ translate([0,offsetFromLidToBracelet2,0])
 
         //Making the grooves for the braces
         //Leeway between the grooves and the real strap
-        strapWidthLeeway = 1;
-        strapGrooveDepth = 0.5;
+        strapWidthLeeway = 1;  
 
         translate([0, braceletLength2-Strap1Width-3+0.5*strapWidthLeeway,-1])
-        cube([width,Strap1Width+strapWidthLeeway,1+strapGrooveDepth]);
+        cube([width,Strap1Width+strapWidthLeeway,1+StrapGrooveDepth]);
 
         translate([0, 30-0.5*strapWidthLeeway,-1])
-        cube([width,Strap2Width+strapWidthLeeway,1+strapGrooveDepth]);
+        cube([width,Strap2Width+strapWidthLeeway,1+StrapGrooveDepth]);
 
         //Making the holes to pass cables
         spaceBetweenStraps = braceletLength2 - Strap1Width - 3 - Strap2Width - 30;
@@ -544,6 +548,22 @@ translate([0,offsetFromLidToBracelet2,0])
 //  translate([-width,0,-braceletThickness])
 //         translate([width, braceletLength2-Strap1Width-3+0.5*strapWidthLeeway,2*braceletThickness-strapGrooveDepth])
 //         cube([width,Strap1Width+strapWidthLeeway,10]);
+}
+
+//Straps
+translate( GenerateInOnePiece ? 
+    [-cos(angleBetweenBraceletParts)*braceletWidth6+sin(angleBetweenBraceletParts)*braceletThickness,0,
+    -lidSupportThickness-cos(angleBetweenBraceletParts)*braceletThickness
+    -sin(angleBetweenBraceletParts)*braceletWidth6] : 
+    [7*(lidWidth+20),0,0]
+)
+rotate(GenerateInOnePiece ? [0,-angleBetweenBraceletParts,0] : [0,0,0])
+if(false)
+{
+    rotate([0,180,0])
+    translate([-StrapsLength1,0,-braceletThickness-StrapsThickness])
+    color("red")
+    ingot(StrapsLength1,braceletLength2,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2, false, true);
 }
 
 module nutSlot(channelBottomOfNutsHeight, channelTopOfNutsHeight, openTop=false)
