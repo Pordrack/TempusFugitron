@@ -20,7 +20,7 @@ legend = "";
 /* [Basic-Settings] */
 
 // Length in units of key. A regular key is 1 unit; spacebar is usually 6.25
-$key_length = 1; // Jeremy: 0.6, 1 and 2
+$key_length = 2; // Jeremy: 0.6, 1 and 2
 
 // What type of stem you want. Most people want Cherry.
 $stem_type = "nut";  // [cherry, alps, rounded_cherry, box_cherry, filled, nut, disable]
@@ -65,7 +65,7 @@ $total_depth = 8;
 // The tilt of the dish in degrees. divided by key height
 $top_tilt = 1;
 // How skewed towards the back the top is (0 for center)
-$top_skew = 0.9; //Jérémy: 1 for 1 and 0.5 for 0.6
+$top_skew = 0.9; //Jérémy: 0.9 for 1 and 0 for 0.6
 
 /* Stem */
 
