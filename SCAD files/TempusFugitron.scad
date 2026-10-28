@@ -5,7 +5,7 @@ use <BezierModule.scad>
 ScrewHeadDiameter = 5+1;
 ScrewHeadThickness = 3; 
 ScrewThreadDiameter = 3+1;
-NutDiameter = 6 + 0.5;
+NutDiameter = 6 + 1.0;
 NutThickness = 2.5+0.8; 
 
 CableHoleDiameter = 4;
@@ -17,7 +17,7 @@ $fn = $preview ? 100 : 500;
 BezierSteps = $preview ? 2 : 500;
 ComputeBeziers = $preview ? false : true;
 
-GenerateInOnePiece = true;
+GenerateInOnePiece = false;
 GenerateBraceletInOnePiece = true;
 
 lidLength = 166;

@@ -1,7 +1,7 @@
 //Taken from https://www.thingiverse.com/thing:2783650/files
 
 ScrewThreadDiameter = 3+1;
-NutDiameter = 6 + 0.5;
+NutDiameter = 6 + 1.0;
 NutThickness = 2.5+0.8; 
 
 // entry point for customizer script. This probably isn't useful to most people,
@@ -20,7 +20,7 @@ legend = "";
 /* [Basic-Settings] */
 
 // Length in units of key. A regular key is 1 unit; spacebar is usually 6.25
-$key_length = 2; // Jeremy: 0.6, 1 and 2
+$key_length = 0.6; // Jeremy: 0.6, 1 and 2
 
 // What type of stem you want. Most people want Cherry.
 $stem_type = "nut";  // [cherry, alps, rounded_cherry, box_cherry, filled, nut, disable]
@@ -57,15 +57,15 @@ $bottom_key_width = 18.16;
 // Height (from the front) of the very bottom of the key
 $bottom_key_height = 18.16;
 // How much less width there is on the top. eg top_key_width = bottom_key_width - width_difference
-$width_difference = 6; //Jérémy: Use 6 for 1 and 1 for 0.6
+$width_difference = 1; //Jérémy: Use 6 for 1 and 1 for 0.6
 // How much less height there is on the top
-$height_difference = 5; //Jérémy: Use 5 for 1 and 1 for 0.6
+$height_difference = 1; //Jérémy: Use 5 for 1 and 1 for 0.6
 // How deep the key is, before adding a dish
 $total_depth = 8;
 // The tilt of the dish in degrees. divided by key height
 $top_tilt = 1;
 // How skewed towards the back the top is (0 for center)
-$top_skew = 0.9; //Jérémy: 0.9 for 1 and 0 for 0.6
+$top_skew = 0; //Jérémy: 0.9 for 1 and 0 for 0.6
 
 /* Stem */
 
