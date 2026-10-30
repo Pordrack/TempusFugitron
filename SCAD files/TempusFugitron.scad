@@ -14,7 +14,7 @@ WiresHoleDiameter = 4;
 BraceletSmoothingAmount = 5; //I advise to not go above 20
 
 $fn = $preview ? 100 : 500; 
-BezierSteps = $preview ? 2 : 500;
+BezierSteps = $preview ? 2 : 5;
 ComputeBeziers = $preview ? false : true;
 
 GenerateInOnePiece = false;
@@ -484,10 +484,19 @@ translate([0,offsetFromLidToBracelet1,0])
 Strap1Width = 50;
 Strap2Width = 20;
 StrapsAngles = 50;
-StrapsLength1 = 40;
-StrapsLength2 = 30;
-StrapsThickness = 5;
+StrapsLength1 = 45;
+StrapsLength2 = 55;
+StrapsThickness = 3.5;
 StrapGrooveDepth = 0.5;
+AngleBetweenStrapsParts = 60;
+StrapsSmoothingAmount = 5;
+StrapsFirstHoleOffset = 5;
+StrapsHolesDiameters = 5.5;
+//To offset the strap to be well aligned when generate in one piece
+StrapPifometricAdjustment = 5 ;
+//Leeway between the grooves and the real strap
+strapWidthLeeway = 1;  
+
 
 //Face 6
 translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
@@ -517,9 +526,6 @@ translate([0,offsetFromLidToBracelet2,0])
         }
 
         //Making the grooves for the braces
-        //Leeway between the grooves and the real strap
-        strapWidthLeeway = 1;  
-
         translate([0, braceletLength2-Strap1Width-3+0.5*strapWidthLeeway,-1])
         cube([width,Strap1Width+strapWidthLeeway,1+StrapGrooveDepth]);
 
@@ -542,28 +548,98 @@ translate([0,offsetFromLidToBracelet2,0])
                     cylinder(d=CableHoleDiameter, h=10);
         }
     } 
-
-//     strapWidthLeeway = 1;
-//         strapGrooveDepth = 1;
-//  translate([-width,0,-braceletThickness])
-//         translate([width, braceletLength2-Strap1Width-3+0.5*strapWidthLeeway,2*braceletThickness-strapGrooveDepth])
-//         cube([width,Strap1Width+strapWidthLeeway,10]);
 }
 
 //Straps
 translate( GenerateInOnePiece ? 
-    [-cos(angleBetweenBraceletParts)*braceletWidth6+sin(angleBetweenBraceletParts)*braceletThickness,0,
+    [-cos(angleBetweenBraceletParts)*StrapsLength1+sin(angleBetweenBraceletParts)*braceletThickness,0,
     -lidSupportThickness-cos(angleBetweenBraceletParts)*braceletThickness
-    -sin(angleBetweenBraceletParts)*braceletWidth6] : 
-    [7*(lidWidth+20),0,0]
+    -sin(angleBetweenBraceletParts)*StrapsLength1] : 
+    [0,(braceletLength1+20),0]
 )
 rotate(GenerateInOnePiece ? [0,-angleBetweenBraceletParts,0] : [0,0,0])
-if(false)
+translate([0, offsetFromLidToBracelet2, 0])
 {
     rotate([0,180,0])
-    translate([-StrapsLength1,0,-braceletThickness-StrapsThickness])
-    color("red")
-    ingot(StrapsLength1,braceletLength2,braceletThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-angleBetweenBraceletParts/2, false, true);
+    {
+        color("brown")
+        translate([-StrapsLength1-StrapPifometricAdjustment,0,-braceletThickness-StrapsThickness+StrapGrooveDepth])
+        translate([0,braceletLength2-Strap1Width-3+strapWidthLeeway,0])
+        {
+            difference()
+            {
+                ingot(StrapsLength1,Strap1Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-AngleBetweenStrapsParts/2, true, true, BraceletSmoothingAmount, 5);
+                translate([0.5*StrapsLength1+StrapsFirstHoleOffset,0.5*Strap1Width,-1])
+                cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
+                
+                translate([0,0,StrapsThickness])
+                cube([StrapsLength1-StrapsSmoothingAmount, Strap1Width, StrapsThickness]);
+            }
+            
+            
+            
+
+            translate([StrapsLength1, 0 , 0])
+            rotate([0,-AngleBetweenStrapsParts,0])
+            {
+                difference()
+                {
+                    union()
+                    {
+                        ingot(StrapsLength2-0.5*Strap1Width,Strap1Width,StrapsThickness, 90, 90, 90-AngleBetweenStrapsParts/2, 90, true, false,5);
+
+                        translate([StrapsLength2-0.5*Strap1Width,0.5*Strap1Width,0])
+                        rotate([0,0,180])
+                        linear_extrude(StrapsThickness) sector(Strap1Width/2, [90,270]);
+                    }
+
+                    for(i = [1:3])
+                    {
+                        translate([(i/4)*StrapsLength2,0.5*Strap1Width,-1])
+                        cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
+                    }
+                }
+            }  
+        } 
+
+
+        translate([-StrapsLength1-StrapPifometricAdjustment,0,-braceletThickness-StrapsThickness+StrapGrooveDepth])
+        translate([0, 30,0])
+        color("brown")
+        {
+            difference()
+            {
+                ingot(StrapsLength1,Strap2Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-angleBetweenBraceletParts/2, true, true, BraceletSmoothingAmount, 5);
+                translate([0.5*StrapsLength1+StrapsFirstHoleOffset,0.5*Strap2Width,-1])
+                cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
+
+                translate([0,0,StrapsThickness])
+                cube([StrapsLength1-StrapsSmoothingAmount, Strap1Width, StrapsThickness]);
+            }
+            
+            translate([StrapsLength1, 0 , 0])
+            rotate([0,-AngleBetweenStrapsParts,0])
+            {
+                difference()
+                {
+                    union()
+                    {
+                        ingot(StrapsLength2-0.5*Strap2Width,Strap2Width,StrapsThickness, 90, 90, 90-AngleBetweenStrapsParts/2, 90, true, false,5);
+
+                        translate([StrapsLength2-0.5*Strap2Width,0.5*Strap2Width,0])
+                        rotate([0,0,180])
+                        linear_extrude(StrapsThickness) sector(Strap2Width/2, [90,270]);
+                    }
+
+                    for(i = [1:3])
+                    {
+                        translate([(i/4)*StrapsLength2,0.5*Strap2Width,-1])
+                        cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
+                    }
+                }
+            }  
+        }    
+    }
 }
 
 module nutSlot(channelBottomOfNutsHeight, channelTopOfNutsHeight, openTop=false)
@@ -582,7 +658,8 @@ module screwSlot(height)
     cylinder(h=200, d=ScrewHeadDiameter);
 }
 
-module ingot(width, length, height, frontAngle, backAngle, leftAngle, rightAngle, smoothLeft = false, smoothRight = false)
+module ingot(width, length, height, frontAngle, backAngle, leftAngle, rightAngle, smoothLeft = false, smoothRight = false
+    , smoothAmountLeft = BraceletSmoothingAmount, smoothAmountRight = BraceletSmoothingAmount)
 {
     //Rotate x and y around 0,0
     function rotate(point,angle) =
@@ -592,10 +669,13 @@ module ingot(width, length, height, frontAngle, backAngle, leftAngle, rightAngle
         let (y2 = sin(angle) * x1 + cos(angle) * y1 )
             [x2, y2];
 
-    //Smooth side only makes sense for ingots with the same left and right angle, since it's there to smooth a potential link to another ingots with the attributs
+    function pointOnThisIngot(smoothAmount) = 
+        [0,smoothAmount];
+    
+    function pointOnNextIngot(smoothAmount, angleToUse) =
+        rotate(pointOnThisIngot(smoothAmount), 2*angleToUse);
+
     focalPoint = [0,0];
-    pointOnThisIngot = [0, 5];
-    pointOnNextIngot = rotate(pointOnThisIngot, 2*leftAngle);
 
     difference()
         {
@@ -606,12 +686,14 @@ module ingot(width, length, height, frontAngle, backAngle, leftAngle, rightAngle
                 if(ComputeBeziers && smoothLeft)
                     rotate([90,90,0])
                     translate([-height,tan(90-leftAngle)*height,-length-1]) 
-                    BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+                    BezQuadCurve( [pointOnNextIngot(smoothAmountLeft, leftAngle),focalPoint,focalPoint
+                        ,pointOnThisIngot(smoothAmountLeft)], focalPoint, 10, length+1);
 
                 if(ComputeBeziers && smoothRight)
                     rotate([-90,90,0])
-                    translate([-height,-width+tan(90-leftAngle)*height,0])
-                    BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+                    translate([-height,-width+tan(90-rightAngle)*height,0])
+                    BezQuadCurve( [pointOnNextIngot(smoothAmountRight, rightAngle),focalPoint,focalPoint
+                        ,pointOnThisIngot(smoothAmountRight)], focalPoint, 10, length+1);
             }
             
             //color("red")
@@ -628,11 +710,11 @@ module ingot(width, length, height, frontAngle, backAngle, leftAngle, rightAngle
             if(ComputeBeziers && smoothLeft)
                 rotate([90,90,0])
                 translate([0,0,-length-1]) 
-                BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+                BezQuadCurve( [pointOnNextIngot(smoothAmountLeft, leftAngle),focalPoint,focalPoint,pointOnThisIngot(smoothAmountLeft)], focalPoint, 10, length+1);
 
             if(ComputeBeziers && smoothRight)
                 rotate([-90,90,0])
                 translate([0,-width,0]) 
-                BezQuadCurve( [pointOnNextIngot,focalPoint,focalPoint,pointOnThisIngot], focalPoint, 10, length+1);
+                BezQuadCurve( [pointOnNextIngot(smoothAmountRight, rightAngle),focalPoint,focalPoint,pointOnThisIngot(smoothAmountRight)], focalPoint, 10, length+1);
         }  
 }
