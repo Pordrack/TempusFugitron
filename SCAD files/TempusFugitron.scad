@@ -1,28 +1,106 @@
 use <SectorArcModule.scad>
 use <BezierModule.scad>
+/* [General] */
+//By default smoothing (rounding edges) is turned off for preview mode, since it's very computing heavy
+ActivateSmoothingOnPreview = false;
+//What part to render ? A sampler is here to help you test the values for inserts and holes
+PartToRender = "all"; //[all,lid,lidSupport, bracelet, cylinder,straps, strap1, strap2, sampler]
 
-//You should add somme wiggle room to the measurement for the screws. Personally A little over 1mm was necessery
+/* [Inserts and holes] */
+//Diameter of the screw head + wiggle room. For M3 screws, it's 5 mm (+1 for wiggle room)
 ScrewHeadDiameter = 5+1;
-ScrewHeadThickness = 3; 
+//Diameter of the thread of the screw + wiggle room. For M3 screws, it's 3mm(+1 for wiggle room)
 ScrewThreadDiameter = 3+1;
+//Diameter of the nut + wiggle room. For M3, 6mm(+1 for wiggle room)
 NutDiameter = 6 + 1.0;
+//How thick is the nut, + wiggle room. For M3, 2.5mm(+0.8 for wiggle room)
 NutThickness = 2.5+0.8; 
 
+//How wide are the holes for the single black cable
 CableHoleDiameter = 4;
+//How wide are the holes for the three wires
 WiresHoleDiameter = 4;
 
-BraceletSmoothingAmount = 5; //I advise to not go above 20
+//Length for the serflex that holes the black cable
+serflexHoleWidth = 3;
+//Thickness for the serflex that holes the black cable
+serflexHoleThickness = 1;
+//How far should the serflex hole be from the edge of the bracelet
+serflexHoleOffset = 3;
+
+/* [Lid] */
+//Lid length
+lidLength = 166;
+//Lid width
+lidWidth = 66;
+//How thick is the plate undert the lid
+lidSupportThickness = 4.7;
+
+/* [Bracelet] */
+//How smooth are the junctions between bracelet sections, since smoothing is very costly, it's turned off by default for preview. You'll need to render the part
+BraceletSmoothingAmount = 5; //[20]
+//The angle between bracelet parts
+angleBetweenBraceletParts = 60;
+//How thick is the bracelet
+braceletThickness = 4;
+
+//Face 1 is under the lid, 2 has the cylinder thingy, 3 the keyboard, 6 a 5 the attach thingy
+braceletWidth1 = lidWidth;
+//Face 2 has the cylinder
+braceletWidth2 = 40;
+//Face 3 has the keyboard
+braceletWidth3 = 50;
+//Bottom one with the warning sign, Normally braceletWidth4 should have the same width as braceletWidth1, according to the papertoy, but since I wanted to have a consistant angle between the bracelet (and because it's easier), I made it narrower to line everything up. 
+braceletWidth4 = 53;
+//Face 5 has the bottom of the straps
+braceletWidth5 = 50;
+//Face 6 has the top of the straps
+braceletWidth6 = 35;
+
+//For the face 1 through 5
+braceletLength1 =  149;
+//Purely here for 'full machine render'
+offsetFromLidToBracelet1 = 8;
+//For face 6
+braceletLength2 = 139;
+//Purely here for 'full machine render'
+offsetFromLidToBracelet2 = 8;
+
+/* [Straps] */
+//Strap 1 width
+Strap1Width = 50;
+//Strap 2 width
+Strap2Width = 20;
+//Difference between the strap width and the width of the grooves for the straps
+strapWidthLeeway = 1;  
+//Length of top part of straps
+StrapsLength1 = 45;
+//Length of bottom part of straps
+StrapsLength2 = 55;
+//How thick are straps
+StrapsThickness = 3.5;
+//How deep are the grooves for the straps in the face
+StrapGrooveDepth = 0.5;
+//Angle between the top and bottom part of the straps
+AngleBetweenStrapsParts = 60;
+//How smooth are the junctions between bracelet sections, since smoothing is very costly, it's turned off by default for preview. You'll need to render the part
+StrapsSmoothingAmount = 5;//[20]
+//The offset for the first hole on the straps
+StrapsFirstHoleOffset = 5;
+//The diameters of the holes in the straps
+StrapsHolesDiameters = 5.5;
+
+//For full machine render. Adjust until it's okay
+StrapPifometricAdjustment = 5 ;
+
+/* [Advanced] */
 
 $fn = $preview ? 100 : 500; 
 BezierSteps = $preview ? 2 : 5;
-ComputeBeziers = $preview ? false : true;
+ComputeBeziers = $preview ? ActivateSmoothingOnPreview : true;
 
-GenerateInOnePiece = false;
+GenerateInOnePiece =  true;
 GenerateBraceletInOnePiece = true;
-
-lidLength = 166;
-lidWidth = 66;
-lidSupportThickness = 4.7;
 
 //Top part
 {
@@ -37,6 +115,7 @@ lidSupportThickness = 4.7;
     sideThickness = 3;
 
     //Lid
+    if(PartToRender == "all" ||PartToRender == "lid")
     translate((GenerateInOnePiece) ? [0,0,0] : [-2*lidWidth,0,0])
     translate([0.5*lidWidth, 0.5*lidLength, 0])
     {
@@ -84,6 +163,7 @@ lidSupportThickness = 4.7;
     }
 
     //Lid support
+    if(PartToRender == "all" ||PartToRender == "lidSupport")
     translate( GenerateInOnePiece ? [lidWidth,0,0] : [lidWidth+20,0,0])
     rotate(GenerateInOnePiece ? [0,180,0] : [0,0,0])
     difference()
@@ -124,39 +204,9 @@ lidSupportThickness = 4.7;
     
 }
 
-//Starting the bracelet
-//      1111
-//     2    6 
-//    2      6
-//    3      5
-//     3    5
-//      4444
-//Face 1 is under the lid, 2 has the cylinder thingy, 3 the keyboard, 6 a 5 the attach thingy
-braceletWidth1 = lidWidth;
-braceletWidth2 = 40;
-braceletWidth3 = 50;
-//Normally braceletWidth4 should have the same width as braceletWidth1, according to the papertoy;
-//But since I wanted to have a consistant angle between the bracelet (and because it's easier), I made it narrower to line everything up
-braceletWidth4 = 53;
-braceletWidth5 = 50;
-braceletWidth6 = 35;
-
-//For the 1, 2, 3, 4, and the beginning of 5
-braceletLength1 =  149;
-offsetFromLidToBracelet1 = 8;
-//For 6
-braceletLength2 = 139;
-offsetFromLidToBracelet2 = 8;//lidLength-braceletLength2 -14;
-braceletThickness = 4;// NutThickness + 2;
-angleBetweenBraceletParts = 60;
-
-serflexHoleWidth = 3;
-serflexHoleThickness = 1;
-
-serflexHoleOffset = 3;
-
 //Face 1
 //Under the lid
+if(PartToRender == "all" ||PartToRender == "bracelet")
 translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? [lidWidth,0,-lidSupportThickness] : [2*(lidWidth+20),0,0])
 rotate(GenerateInOnePiece || GenerateBraceletInOnePiece ? [0,180,0] : [0,0,0])
 translate([0,offsetFromLidToBracelet1,0])
@@ -227,6 +277,7 @@ translate([0,offsetFromLidToBracelet1,0])
     notchRadiusSpan = 15;
     notchWallsThickness = 2;
 
+    if(PartToRender == "all" ||PartToRender == "cylinder")
     translate(GenerateInOnePiece ? [0,0,0] : [0,0,100])
     difference()
     {
@@ -332,6 +383,7 @@ translate([0,offsetFromLidToBracelet1,0])
         // cube([10,10,20]);
     }
 
+    if(PartToRender == "all" ||PartToRender == "bracelet")
     difference()
     {
         rotate([0,180,0])
@@ -355,6 +407,7 @@ translate([0,offsetFromLidToBracelet1,0])
 
 //Face 3
 //With the keyboard
+if(PartToRender == "all" ||PartToRender == "bracelet")
 translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [lidWidth+cos(angleBetweenBraceletParts)*(braceletWidth2)-sin(angleBetweenBraceletParts)*braceletThickness
     ,0,-lidSupportThickness-sin(angleBetweenBraceletParts)*(braceletWidth2)+cos(angleBetweenBraceletParts)*braceletThickness] : 
@@ -410,6 +463,7 @@ translate([0,offsetFromLidToBracelet1,0])
 
 //Face 4
 //Bottom, with the warning bit
+if(PartToRender == "all" ||PartToRender == "bracelet")
 translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [lidWidth-cos(angleBetweenBraceletParts)*(braceletWidth3-braceletWidth2),0,
     -lidSupportThickness-sin(angleBetweenBraceletParts)*(braceletWidth2+braceletWidth3)+2*cos(angleBetweenBraceletParts)*braceletThickness] : 
@@ -438,6 +492,7 @@ translate([0,offsetFromLidToBracelet1,0])
 }
 
 //Face 5
+if(PartToRender == "all" ||PartToRender == "bracelet")
 translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [-cos(angleBetweenBraceletParts)*(braceletWidth3-braceletWidth2)+sin(angleBetweenBraceletParts)*braceletThickness+(braceletWidth1-braceletWidth4)
     ,0,
@@ -481,24 +536,8 @@ translate([0,offsetFromLidToBracelet1,0])
     // cube([3,4,braceletThickness+5]);
 }
 
-Strap1Width = 50;
-Strap2Width = 20;
-StrapsAngles = 50;
-StrapsLength1 = 45;
-StrapsLength2 = 55;
-StrapsThickness = 3.5;
-StrapGrooveDepth = 0.5;
-AngleBetweenStrapsParts = 60;
-StrapsSmoothingAmount = 5;
-StrapsFirstHoleOffset = 5;
-StrapsHolesDiameters = 5.5;
-//To offset the strap to be well aligned when generate in one piece
-StrapPifometricAdjustment = 5 ;
-//Leeway between the grooves and the real strap
-strapWidthLeeway = 1;  
-
-
 //Face 6
+if(PartToRender == "all" ||PartToRender == "bracelet")
 translate( GenerateInOnePiece || GenerateBraceletInOnePiece ? 
     [-cos(angleBetweenBraceletParts)*braceletWidth6+sin(angleBetweenBraceletParts)*braceletThickness,0,
     -lidSupportThickness-cos(angleBetweenBraceletParts)*braceletThickness
@@ -562,13 +601,14 @@ translate([0, offsetFromLidToBracelet2, 0])
 {
     rotate([0,180,0])
     {
+        if(PartToRender == "all" || PartToRender == "straps" || PartToRender == "strap1")
         color("brown")
         translate([-StrapsLength1-StrapPifometricAdjustment,0,-braceletThickness-StrapsThickness+StrapGrooveDepth])
         translate([0,braceletLength2-Strap1Width-3+strapWidthLeeway,0])
         {
             difference()
             {
-                ingot(StrapsLength1,Strap1Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-AngleBetweenStrapsParts/2, true, true, BraceletSmoothingAmount, 5);
+                ingot(StrapsLength1,Strap1Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-AngleBetweenStrapsParts/2, true, true, BraceletSmoothingAmount, StrapsSmoothingAmount);
                 translate([0.5*StrapsLength1+StrapsFirstHoleOffset,0.5*Strap1Width,-1])
                 cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
                 
@@ -586,7 +626,7 @@ translate([0, offsetFromLidToBracelet2, 0])
                 {
                     union()
                     {
-                        ingot(StrapsLength2-0.5*Strap1Width,Strap1Width,StrapsThickness, 90, 90, 90-AngleBetweenStrapsParts/2, 90, true, false,5);
+                        ingot(StrapsLength2-0.5*Strap1Width,Strap1Width,StrapsThickness, 90, 90, 90-AngleBetweenStrapsParts/2, 90, true, false,StrapsSmoothingAmount);
 
                         translate([StrapsLength2-0.5*Strap1Width,0.5*Strap1Width,0])
                         rotate([0,0,180])
@@ -603,13 +643,14 @@ translate([0, offsetFromLidToBracelet2, 0])
         } 
 
 
+        if(PartToRender == "all" || PartToRender == "straps" || PartToRender == "strap2")
         translate([-StrapsLength1-StrapPifometricAdjustment,0,-braceletThickness-StrapsThickness+StrapGrooveDepth])
         translate([0, 30,0])
         color("brown")
         {
             difference()
             {
-                ingot(StrapsLength1,Strap2Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-angleBetweenBraceletParts/2, true, true, BraceletSmoothingAmount, 5);
+                ingot(StrapsLength1,Strap2Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-angleBetweenBraceletParts/2, true, true, BraceletSmoothingAmount, StrapsSmoothingAmount);
                 translate([0.5*StrapsLength1+StrapsFirstHoleOffset,0.5*Strap2Width,-1])
                 cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
 
@@ -624,7 +665,7 @@ translate([0, offsetFromLidToBracelet2, 0])
                 {
                     union()
                     {
-                        ingot(StrapsLength2-0.5*Strap2Width,Strap2Width,StrapsThickness, 90, 90, 90-AngleBetweenStrapsParts/2, 90, true, false,5);
+                        ingot(StrapsLength2-0.5*Strap2Width,Strap2Width,StrapsThickness, 90, 90, 90-AngleBetweenStrapsParts/2, 90, true, false,StrapsSmoothingAmount);
 
                         translate([StrapsLength2-0.5*Strap2Width,0.5*Strap2Width,0])
                         rotate([0,0,180])
@@ -640,6 +681,33 @@ translate([0, offsetFromLidToBracelet2, 0])
             }  
         }    
     }
+}
+
+if(PartToRender == "sampler")
+difference()
+{
+    thickness = 1 + NutThickness;
+    width = 2 + max(NutDiameter, ScrewHeadDiameter, CableHoleDiameter, WiresHoleDiameter);
+    length = 1+NutDiameter+1+1+2*ScrewHeadDiameter+1+serflexHoleWidth+1+CableHoleDiameter+1+WiresHoleDiameter+1;
+    translate([0, -0.5*width, 0])
+    cube([length,width,thickness]);
+    translate([1+NutDiameter/2,0,0])
+    nutSlot(1,0, true);
+
+    translate([1+NutDiameter+1+0.5*ScrewHeadDiameter,0,0])
+    screwSlot(2);
+
+    translate([1+NutDiameter+1+1+1.5*ScrewHeadDiameter,0,0])
+    screwSlot(1);
+
+    translate([1+NutDiameter+1+1+2*ScrewHeadDiameter+1,0.5*width-serflexHoleThickness-serflexHoleOffset,-1])
+    cube([serflexHoleWidth, serflexHoleThickness, thickness+2]);
+
+    translate([1+NutDiameter+1+1+2*ScrewHeadDiameter+1+serflexHoleWidth+1+0.5*CableHoleDiameter,0,-1])
+    cylinder(d=CableHoleDiameter, h = thickness+2);
+
+    translate([1+NutDiameter+1+1+2*ScrewHeadDiameter+1+serflexHoleWidth+1+CableHoleDiameter+1+0.5*WiresHoleDiameter,0,-1])
+    cylinder(d=WiresHoleDiameter, h= thickness+2);
 }
 
 module nutSlot(channelBottomOfNutsHeight, channelTopOfNutsHeight, openTop=false)
