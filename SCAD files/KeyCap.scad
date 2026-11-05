@@ -58,7 +58,7 @@ $bottom_key_width = 18.16;
 $bottom_key_height = 18.16;
 // Pordrack: Use 6 for 1 and 1 for 0.6 || How much less width there is on the top. eg top_key_width = bottom_key_width - width_difference
 $width_difference = 1;
-// Pordrack: Jérémy: Use 5 for 1 and 1 for 0.6 || How much less height there is on the top
+// Pordrack: Use 5 for 1 and 1 for 0.6 || How much less height there is on the top
 $height_difference = 1;
 // How deep the key is, before adding a dish
 $total_depth = 8;
