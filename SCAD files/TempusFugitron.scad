@@ -8,13 +8,13 @@ PartToRender = "all"; //[all,lid,lidSupport, bracelet, cylinder,straps, strap1, 
 
 /* [Inserts and holes] */
 //Diameter of the screw head + wiggle room. For M3 screws, it's 5 mm (+1 for wiggle room)
-ScrewHeadDiameter = 5+1;
+ScrewHeadDiameter = 6;
 //Diameter of the thread of the screw + wiggle room. For M3 screws, it's 3mm(+1 for wiggle room)
-ScrewThreadDiameter = 3+1;
+ScrewThreadDiameter = 4;
 //Diameter of the nut + wiggle room. For M3, 6mm(+1 for wiggle room)
-NutDiameter = 6 + 1.0;
+NutDiameter = 7;
 //How thick is the nut, + wiggle room. For M3, 2.5mm(+0.8 for wiggle room)
-NutThickness = 2.5+0.8; 
+NutThickness = 3.3; 
 
 //How wide are the holes for the single black cable
 CableHoleDiameter = 4;
