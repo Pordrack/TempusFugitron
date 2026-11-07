@@ -608,7 +608,7 @@ translate([0, offsetFromLidToBracelet2, 0])
         {
             difference()
             {
-                ingot(StrapsLength1,Strap1Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-AngleBetweenStrapsParts/2, true, true, BraceletSmoothingAmount, StrapsSmoothingAmount);
+                ingot(StrapsLength1,Strap1Width,StrapsThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-AngleBetweenStrapsParts/2, true, true, BraceletSmoothingAmount, StrapsSmoothingAmount);
                 translate([0.5*StrapsLength1+StrapsFirstHoleOffset,0.5*Strap1Width,-1])
                 cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
                 
@@ -650,7 +650,8 @@ translate([0, offsetFromLidToBracelet2, 0])
         {
             difference()
             {
-                ingot(StrapsLength1,Strap2Width,StrapsThickness, 90, 90, AngleBetweenStrapsParts/2, 90-angleBetweenBraceletParts/2, true, true, BraceletSmoothingAmount, StrapsSmoothingAmount);
+                ingot(StrapsLength1,Strap2Width,StrapsThickness, 90, 90, 90-angleBetweenBraceletParts/2, 90-AngleBetweenStrapsParts/2, true, true, BraceletSmoothingAmount, StrapsSmoothingAmount);
+
                 translate([0.5*StrapsLength1+StrapsFirstHoleOffset,0.5*Strap2Width,-1])
                 cylinder(h=2*StrapsThickness, d=StrapsHolesDiameters, $fn=6);
 
