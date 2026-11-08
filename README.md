@@ -6,4 +6,4 @@ I included free use images I printed to decorate my print. https://www.needpix.c
 The repo also contains links to my references (Olivier Marten's work).
 
 You can find a video tutorial on how to print and customize the machine on my YouTube channel (french only):
-https://youtu.be/xiapa8iMiN0 https://youtu.be/KP5sTlOEduE
+https://www.youtube.com/watch?v=xiapa8iMiN0&list=PLB_gmuxePYbs&index=1
