@@ -1,11 +1,27 @@
 //Taken from https://www.thingiverse.com/thing:2783650/files
 
-ScrewThreadDiameter = 3+1;
-NutDiameter = 6 + 1.0;
-NutThickness = 2.5+0.8; 
-
 // entry point for customizer script. This probably isn't useful to most people,
 // as it's just a wrapper that helps generate customizer.scad for thingiverse.
+
+/* [Tempusfugitron] */
+// What type of stem you want. Most people want Cherry.
+$stem_type = "nut";  // [cherry, alps, rounded_cherry, box_cherry, filled, nut, disable]
+
+//Diameter of the thread of the screw + wiggle room. For M3 screws, it's 3mm(+1 for wiggle room)
+ScrewThreadDiameter = 4;
+//Diameter of the nut + wiggle room. For M3, 6mm(+1 for wiggle room)
+NutDiameter = 7;
+//How thick is the nut, + wiggle room. For M3, 2.5mm(+0.8 for wiggle room)
+NutThickness = 3.3; 
+
+// Pordrack: 0.6, 1 and 2 || Length in units of key. A regular key is 1 unit; spacebar is usually 6.25
+$key_length = 0.6; // 
+// Pordrack:  0.6 -> 1 ; 1,2 -> 6 || How much less width there is on the top. eg top_key_width = bottom_key_width - width_difference
+$width_difference = 1;
+// Pordrack: 0.6 -> 1 ; 1,2 -> 5 || How much less height there is on the top
+$height_difference = 1;
+// Pordrack:  0.6 -> 0 ; 1,2 -> 0.9 || How skewed towards the back the top is (0 for center)
+$top_skew = 0.001;
 
 /* [Basic-Settings] */
 
@@ -18,12 +34,6 @@ row = 1; // [5,1,2,3,4,0]
 legend = "";
 
 /* [Basic-Settings] */
-
-// Pordrack: 0.6, 1 and 2 || Length in units of key. A regular key is 1 unit; spacebar is usually 6.25
-$key_length = 0.6; // 
-
-// What type of stem you want. Most people want Cherry.
-$stem_type = "nut";  // [cherry, alps, rounded_cherry, box_cherry, filled, nut, disable]
 
 // The stem is the hardest part to print, so this variable controls how much 'slop' there is in the stem
 $stem_slop = 0.3; // Not working in thingiverse customizer atm [0:0.01:1]
@@ -56,16 +66,10 @@ $corner_radius = 1;
 $bottom_key_width = 18.16;
 // Height (from the front) of the very bottom of the key
 $bottom_key_height = 18.16;
-// Pordrack: Use 6 for 1 and 1 for 0.6 || How much less width there is on the top. eg top_key_width = bottom_key_width - width_difference
-$width_difference = 1;
-// Pordrack: Use 5 for 1 and 1 for 0.6 || How much less height there is on the top
-$height_difference = 1;
 // How deep the key is, before adding a dish
 $total_depth = 8;
 // The tilt of the dish in degrees. divided by key height
 $top_tilt = 1;
-// Pordrack: 0.9 for 1 and 0 for 0.6 || How skewed towards the back the top is (0 for center)
-$top_skew = 0; //
 
 /* Stem */
 
